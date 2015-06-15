@@ -27,7 +27,7 @@ class PostProcessRule(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def default_processor(self, data):
+        pass
     
-QUEUE_FETCH_URL = 'wget.urls_to_fetch'
-QUEUE_FETCHED_URL = 'wget.urls_fetched'
-QUEUE_FAILED_URL = 'wget.urls_failed'

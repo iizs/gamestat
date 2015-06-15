@@ -1,6 +1,15 @@
 from django.db import IntegrityError, transaction
 
+import datetime
+import time
+import urllib2
+import traceback
+
 from models import Channel, PersistentQueue
+
+QUEUE_FETCH_URL = 'wget.urls_to_fetch'
+QUEUE_FETCHED_URL = 'wget.urls_fetched'
+QUEUE_FAILED_URL = 'wget.urls_failed'
 
 @transaction.atomic
 def enqueue(channel_id, body):
@@ -58,3 +67,39 @@ def queue_stat(channel_id):
         return r
     except Channel.DoesNotExist as e:
         print 'invalid channel_id `{ch_id}`'.format(ch_id=channel_id)
+
+def logger(msg):
+    ts = datetime.datetime.now()
+    print '[{ts}] {msg}'.format(ts=str(ts), msg=msg)
+
+def enqueue_url(url):
+    enqueue( QUEUE_FETCH_URL, url )
+
+def fetch_url(sleep=1, autostop=600):
+    last_successful_fetch = int(time.time())
+   
+    while ( autostop == 0 ) or ( autostop >= int(time.time()) - last_successful_fetch ) :
+        url = dequeue(QUEUE_FETCH_URL)
+        if url != None:
+            try:
+                r = urllib2.urlopen(url)
+                body = r.read()
+                enqueue(QUEUE_FETCHED_URL, body)
+                last_successful_fetch = int(time.time())
+                logger('URL fetched; {url}'.format(url=url))
+            except Exception as e:
+                body = url + '\n'
+                body += traceback.format_exc()
+                enqueue(QUEUE_FAILED_URL, body)
+                logger('URL fetching failed; ' + body)
+        else:
+            remain = autostop - (int(time.time()) - last_successful_fetch)
+            if remain < 60:
+                msg = '; shutdown in {remain} seconds'.format(remain=remain)
+            else:
+                msg = ''
+
+            logger('Queue empty{msg}'.format(msg=msg))
+
+        time.sleep(sleep)
+    

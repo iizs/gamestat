@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from wget.models import Channel, PersistentQueue
-from wget.models import QUEUE_FETCH_URL
-from wget.utils import enqueue, dequeue, queue_stat
+
+from wget.utils import enqueue_url
 
 class Command(BaseCommand):
     help = 'schedule to get a web document'
@@ -11,5 +10,5 @@ class Command(BaseCommand):
         if len(args) < 1:
             raise CommandError('invalid arguments')
 
-        enqueue( QUEUE_FETCH_URL, args[0] )
+        enqueue_url(args[0])
 
