@@ -17,6 +17,14 @@ class PersistentQueue(models.Model):
     def __unicode__(self):
         return str(self.channel) + ' / ' + str(self.datetime)
 
+class PostProcessRule(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    pattern = models.CharField(max_length=4096)
+    priority = models.SmallIntegerField(db_index=True)
+
+    def __unicode__(self):
+        return self.name
+    
 QUEUE_FETCH_URL = 'wget.urls_to_fetch'
 QUEUE_FETCHED_URL = 'wget.urls_fetched'
 QUEUE_FAILED_URL = 'wget.urls_failed'
