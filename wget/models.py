@@ -18,3 +18,5 @@ class PersistentQueue(models.Model):
         return str(self.channel) + ' / ' + str(self.datetime)
 
 QUEUE_FETCH_URL = 'wget.urls_to_fetch'
+QUEUE_FETCHED_URL = 'wget.urls_fetched'
+QUEUE_FAILED_URL = 'wget.urls_failed'
