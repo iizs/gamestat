@@ -21,6 +21,9 @@ class PostProcessRule(models.Model):
     name = models.CharField(max_length=255, unique=True)
     pattern = models.CharField(max_length=4096)
     priority = models.SmallIntegerField(db_index=True)
+    module_name = models.CharField(max_length=255, null=True, blank=True)
+    class_name = models.CharField(max_length=255, null=True, blank=True)
+    function_name = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
