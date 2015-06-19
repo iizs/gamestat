@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'pipeline',
     'twitter_bootstrap',
     'wget',
     'kbo',
@@ -54,7 +55,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'gamestat.urls'
 
 WSGI_APPLICATION = 'gamestat.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -81,10 +81,69 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Pipeline
+PIPELINE_CSS = {
+    'bootstrap': {
+        'source_filenames': (
+            'twitter_bootstrap/less/bootstrap.less',
+        ),
+        'output_filename': 'css/b.css',
+        'extra_context': {
+            'media': 'screen,projection',
+        },
+    },
+}
+
+PIPELINE_JS = {
+    'bootstrap': {
+        'source_filenames': (
+            'twitter_bootstrap/js/transition.js',
+            'twitter_bootstrap/js/modal.js',
+            'twitter_bootstrap/js/dropdown.js',
+            'twitter_bootstrap/js/scrollspy.js',
+            'twitter_bootstrap/js/tab.js',
+            'twitter_bootstrap/js/tooltip.js',
+            'twitter_bootstrap/js/popover.js',
+            'twitter_bootstrap/js/alert.js',
+            'twitter_bootstrap/js/button.js',
+            'twitter_bootstrap/js/collapse.js',
+            'twitter_bootstrap/js/carousel.js',
+            'twitter_bootstrap/js/affix.js',
+        ),
+        'output_filename': 'js/b.js',
+    },
+}
+
+PIPELINE_COMPILERS = (
+    'pipeline.compilers.less.LessCompiler',
+)
+
+PIPLINE_ENABLED = True
+
+import twitter_bootstrap
+bootstrap_less = os.path.join(os.path.dirname(twitter_bootstrap.__file__), 'static', 'less')
+
+PIPELINE_LESS_ARGUMENTS = u'--include-path={}'.format(
+    os.pathsep.join([
+        bootstrap_less,
+    ])
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/gamestat/static/'
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
+# Template
+ROOT_TEMPLATE = os.path.join(STATIC_ROOT, 'templates')
+TEMPLATE_DIRS = [
+    ROOT_TEMPLATE,
+]
 
