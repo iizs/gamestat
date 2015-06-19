@@ -46,7 +46,6 @@ class PostProcessRule(models.Model):
             c = getattr(m, self.class_name)
             i = c()
             f = getattr(i, self.function_name)
-            print f.func_code.co_flags
             f(*args, **kwargs)
     
     class NoMatchingRuleFound(Exception):
