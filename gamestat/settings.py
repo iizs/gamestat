@@ -24,7 +24,7 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['iizs.net']
 
 
 # Application definition
@@ -82,12 +82,27 @@ USE_L10N = True
 USE_TZ = True
 
 # Pipeline
+PIPELINE_COMPILERS = (
+    'pipeline.compilers.less.LessCompiler',
+)
+
+PIPELINE_ENABLED = True
+
+import twitter_bootstrap
+bootstrap_less = os.path.join(os.path.dirname(twitter_bootstrap.__file__), 'static', 'less')
+
+PIPELINE_LESS_ARGUMENTS = u'--include-path={}'.format(
+    os.pathsep.join([
+        bootstrap_less,
+    ])
+)
+
 PIPELINE_CSS = {
     'bootstrap': {
         'source_filenames': (
             'twitter_bootstrap/less/bootstrap.less',
         ),
-        'output_filename': 'css/b.css',
+        'output_filename': 'css/bootstrap.css',
         'extra_context': {
             'media': 'screen,projection',
         },
@@ -110,24 +125,9 @@ PIPELINE_JS = {
             'twitter_bootstrap/js/carousel.js',
             'twitter_bootstrap/js/affix.js',
         ),
-        'output_filename': 'js/b.js',
+        'output_filename': 'js/bootstrap.js',
     },
 }
-
-PIPELINE_COMPILERS = (
-    'pipeline.compilers.less.LessCompiler',
-)
-
-PIPLINE_ENABLED = True
-
-import twitter_bootstrap
-bootstrap_less = os.path.join(os.path.dirname(twitter_bootstrap.__file__), 'static', 'less')
-
-PIPELINE_LESS_ARGUMENTS = u'--include-path={}'.format(
-    os.pathsep.join([
-        bootstrap_less,
-    ])
-)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
