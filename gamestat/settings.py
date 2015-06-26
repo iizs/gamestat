@@ -152,6 +152,12 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/bootstrap.js',
     },
+    'jquery': {
+        'source_filenames': (
+            'ui/js/jquery-1.11.3.min.js',
+        ),
+        'output_filename': 'js/jquery-1.11.3.min.js',
+    },
 }
 
 # Template
