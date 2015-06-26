@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'twitter_bootstrap',
     'wget',
     'kbo',
+    'ui',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -81,12 +82,27 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.7/howto/static-files/
+
+STATIC_URL = '/gamestat/static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+STATIC_DIRS = ( os.path.join(BASE_DIR,'static') )
+#STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
 # Pipeline
 PIPELINE_COMPILERS = (
     'pipeline.compilers.less.LessCompiler',
 )
 
 PIPELINE_ENABLED = True
+PIPELINE_DISABLE_WRAPPER = True
 
 import twitter_bootstrap
 bootstrap_less = os.path.join(os.path.dirname(twitter_bootstrap.__file__), 'static', 'less')
@@ -98,6 +114,15 @@ PIPELINE_LESS_ARGUMENTS = u'--include-path={}'.format(
 )
 
 PIPELINE_CSS = {
+    'starter-template': {
+        'source_filenames': (
+            'ui/css/starter-template.css',
+        ),
+        'output_filename': 'css/starter-template.css',
+        'extra_context': {
+            'media': 'screen,projection',
+        },
+    },
     'bootstrap': {
         'source_filenames': (
             'twitter_bootstrap/less/bootstrap.less',
@@ -129,20 +154,8 @@ PIPELINE_JS = {
     },
 }
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
-
-STATIC_URL = '/gamestat/static/'
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
-)
-
 # Template
-ROOT_TEMPLATE = os.path.join(STATIC_ROOT, 'templates')
+ROOT_TEMPLATE = os.path.join(BASE_DIR, 'templates')
 TEMPLATE_DIRS = [
     ROOT_TEMPLATE,
 ]
