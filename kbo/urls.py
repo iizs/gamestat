@@ -6,6 +6,6 @@ import views
 urlpatterns = patterns('',
     url(r'^$', views.overview, name='overview'),
     url(r'scores/$', views.scores, name='scores'),
-    url(r'scores/(?P<basedate>\d+)/$', views.scores, name='scores'),
+    url(r'scores/(?P<basedate>\d+)/$', views.scores, name='scores_on'),
     url(r'standings/$', views.standings, name='standings'),
 )

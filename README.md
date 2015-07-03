@@ -17,3 +17,12 @@ user = gamestat_admin
 password = PASSWORD
 default-character-set = utf8
 ```
+
+## Requires 
+
+* Django==1.7.5
+* django-pipeline==1.5.1
+* django-twitter-bootstrap==3.3.0
+* futures==3.0.3
+* mysqlclient==1.3.6
+* https://github.com/eternicode/bootstrap-datepicker

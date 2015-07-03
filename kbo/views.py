@@ -23,7 +23,10 @@ def standings(request):
     return HttpResponse(template.render(context))
 
 def scores(request, basedate=None):
+    latest_score = Score.objects.order_by('-date')[0]
+    oldest_score = Score.objects.order_by('date')[0]
     date = None
+
     if basedate != None:
         m = re.match('([0-9]{2,4})([0-9]{2})([0-9]{2})', str(basedate))
         if m != None:
@@ -35,13 +38,14 @@ def scores(request, basedate=None):
             date = datetime.date(year, month, day)
 
     if date == None:
-        score = Score.objects.order_by('-date')[0]
-        date = score.date
+        date = latest_score.date
 
     scores = Score.objects.filter(date=date)
     template = loader.get_template('kbo/scores.html')
     context = RequestContext(request, {
         'scores' : scores,
         'basedate' : date,
+        'startDate' : oldest_score.date,
+        'endDate' : latest_score.date,
     })
     return HttpResponse(template.render(context))

@@ -126,6 +126,7 @@ PIPELINE_CSS = {
     'kbo': {
         'source_filenames': (
             'ui/css/dashboard.css',
+            'ui/css/datepicker.css',
         ),
         'output_filename': 'css/kbo.css',
         'extra_context': {
@@ -166,6 +167,13 @@ PIPELINE_JS = {
             'ui/js/jquery-1.11.3.min.js',
         ),
         'output_filename': 'js/jquery-1.11.3.min.js',
+    },
+    'datepicker': {
+        'source_filenames': (
+            'ui/js/bootstrap-datepicker.js',
+            'ui/js/date-assist.js',
+        ),
+        'output_filename': 'js/bootstrap-datepicker.js',
     },
 }
 

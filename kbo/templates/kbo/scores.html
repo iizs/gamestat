@@ -1,8 +1,13 @@
 {% extends "kbo/base.html" %}
 
+{% load pipeline %}
 {% block kbo_content %}
 
-<h2 class="sub-header">Scores @ {{ basedate }} </h2>
+<h2 class="sub-header">Scores</h2>
+<div class="input-group date">
+  <input type="text" class="form-control" value="{{ basedate.year }}/{{ basedate.month }}/{{ basedate.day }}">
+  <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+</div>
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
@@ -29,4 +34,20 @@
   <table>
 <div>
 
+{% endblock %}
+
+{% block javascripts %}
+{% javascript 'datepicker' %}
+<script>
+$('.input-group.date').datepicker({
+  format: 'yyyy/mm/dd',
+  startDate: '{{ startDate.year }}/{{ startDate.month }}/{{ startDate.day }}',
+  endDate: '{{ endDate.year }}/{{ endDate.month }}/{{ endDate.day }}',
+  orientation: 'bottom',
+});
+$('.input-group.date').on("changeDate", function(event) {
+    d = new Date($('.input-group.date').datepicker('getDate'))
+    window.location.href = '{% url 'kbo:scores' %}'.concat( d.yyyymmdd() )
+});
+</script>
 {% endblock %}
