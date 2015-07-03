@@ -4,6 +4,7 @@ from django.template import RequestContext, loader
 
 import logging
 import datetime
+import re
 
 from models import Score
 
@@ -22,10 +23,25 @@ def standings(request):
     return HttpResponse(template.render(context))
 
 def scores(request, basedate=None):
-    date = datetime.date(2015, 05, 05)
+    date = None
+    if basedate != None:
+        m = re.match('([0-9]{2,4})([0-9]{2})([0-9]{2})', str(basedate))
+        if m != None:
+            year = int(m.group(1))
+            month = int(m.group(2))
+            day = int(m.group(3))
+            if year < 100:
+                year += 2000
+            date = datetime.date(year, month, day)
+
+    if date == None:
+        score = Score.objects.order_by('-date')[0]
+        date = score.date
+
     scores = Score.objects.filter(date=date)
     template = loader.get_template('kbo/scores.html')
     context = RequestContext(request, {
         'scores' : scores,
+        'basedate' : date,
     })
     return HttpResponse(template.render(context))
