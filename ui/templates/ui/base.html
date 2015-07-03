@@ -45,9 +45,8 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <!--<li class="{% active 'home' %}"><a href="{% url 'home' %}">Home</a></li>-->
-            <li class="{% active 'kbo' %}"><a href="{% url 'kbo' %}">KBO</a></li>
-            <li class="{% active 'contact' %}"><a href="{% url 'contact' %}">Contact</a></li>
+            <li class="{% active_top 'kbo' %}"><a href="{% url 'kbo' %}">KBO</a></li>
+            <li class="{% active_top 'contact' %}"><a href="{% url 'contact' %}">Contact</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
