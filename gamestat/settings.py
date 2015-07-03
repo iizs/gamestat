@@ -117,6 +117,7 @@ PIPELINE_CSS = {
     'starter-template': {
         'source_filenames': (
             'ui/css/starter-template.css',
+            'ui/css/dashboard.css',
         ),
         'output_filename': 'css/starter-template.css',
         'extra_context': {
