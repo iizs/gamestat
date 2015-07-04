@@ -77,11 +77,11 @@ class Season(models.Model):
     )
 
     DRAW_NOT_INCLUDED = 'x'
-    DRAW_EQ_LOST = 'l'
+    DRAW_EQ_LOSS = 'l'
     DRAW_EQ_HALF_WIN = 'h'
     DRAW_OPTION = (
         (DRAW_NOT_INCLUDED, 'Exclude draw from PCT'),
-        (DRAW_EQ_LOST, 'Count draw as lost'),
+        (DRAW_EQ_LOSS, 'Count draw as loss'),
         (DRAW_EQ_HALF_WIN, 'Count draw as 1/2 win'),
     )
 
@@ -94,3 +94,24 @@ class Season(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class Standing(models.Model):
+    season =  models.ForeignKey(Season)
+    date = models.DateField(db_index=True)
+    team = models.CharField(max_length=255, db_index=True)
+    games = models.SmallIntegerField()
+    wins = models.SmallIntegerField()
+    losses = models.SmallIntegerField()
+    draws = models.SmallIntegerField()
+    pct = models.SmallIntegerField()    # PCT * 1000
+    gb = models.SmallIntegerField()     # gb * 10
+    l10 = models.SmallIntegerField()
+    streak = models.SmallIntegerField() # + is winning streak, - is losing streak
+    home_wins = models.SmallIntegerField()
+    home_losses = models.SmallIntegerField()
+    home_draws = models.SmallIntegerField()
+
+    class Meta:
+        unique_together = (
+            ('season', 'date', 'team'),
+        )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from models import Score, Season
+from models import Score, Season, Standing
 
 class ScoreAdmin(admin.ModelAdmin):
     list_display = (
@@ -20,6 +20,20 @@ class SeasonAdmin(admin.ModelAdmin):
         'games_per_team',
         'draw_option',
     )
+
+class StandingAdmin(admin.ModelAdmin):
+    list_display = (
+        'season',
+        'date',
+        'team',
+        'games',
+        'wins',
+        'losses',
+        'draws',
+        'pct',
+        'gb',
+    )
     
 admin.site.register(Score, ScoreAdmin)
 admin.site.register(Season, SeasonAdmin)
+admin.site.register(Standing, StandingAdmin)
