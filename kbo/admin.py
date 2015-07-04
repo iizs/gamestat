@@ -17,6 +17,7 @@ class SeasonAdmin(admin.ModelAdmin):
         'start_date',
         'end_date',
         'season_type',
+        'games_per_team',
         'draw_option',
     )
     

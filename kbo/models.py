@@ -88,6 +88,7 @@ class Season(models.Model):
     name = models.CharField(max_length=255, unique=True, db_index=True)
     start_date = models.DateField(db_index=True)
     end_date = models.DateField(db_index=True)
+    games_per_team = models.SmallIntegerField(null=True, blank=True)
     season_type = models.CharField(max_length=2, choices=SEASON_TYPE, verbose_name = 'Type')
     draw_option = models.CharField(max_length=1, choices=DRAW_OPTION)
 
