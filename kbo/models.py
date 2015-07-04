@@ -66,3 +66,30 @@ class Score(models.Model):
             ('date', 'home_team', 'away_team'),
         )
 
+class Season(models.Model):
+    EXHIBITION_GAME = 'eg'
+    PENNANT_RACE = 'pr'
+    POST_SEASON = 'ps'
+    SEASON_TYPE = (
+        (EXHIBITION_GAME, 'Exhibition Games'),
+        (PENNANT_RACE, 'Pennant Race'),
+        (POST_SEASON, 'Post Season'),
+    )
+
+    DRAW_NOT_INCLUDED = 'x'
+    DRAW_EQ_LOST = 'l'
+    DRAW_EQ_HALF_WIN = 'h'
+    DRAW_OPTION = (
+        (DRAW_NOT_INCLUDED, 'Exclude draw from PCT'),
+        (DRAW_EQ_LOST, 'Count draw as lost'),
+        (DRAW_EQ_HALF_WIN, 'Count draw as 1/2 win'),
+    )
+
+    name = models.CharField(max_length=255, unique=True, db_index=True)
+    start_date = models.DateField(db_index=True)
+    end_date = models.DateField(db_index=True)
+    season_type = models.CharField(max_length=2, choices=SEASON_TYPE, verbose_name = 'Type')
+    draw_option = models.CharField(max_length=1, choices=DRAW_OPTION)
+
+    def __unicode__(self):
+        return self.name
