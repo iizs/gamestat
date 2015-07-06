@@ -199,13 +199,13 @@ class Standing(models.Model):
         self.games += 1
         if self.season.draw_option == Season.DRAW_NOT_INCLUDED:
             if self.wins + self.losses > 0:
-                self.pct = int(self.wins / float(self.wins + self.losses) * 100)
+                self.pct = int(self.wins / float(self.wins + self.losses) * 1000)
             else:
                 self.pct = 0
         elif self.season.draw_option == Season.DRAW_EQ_LOSS:
-            self.pct = int(self.wins / float(self.games) * 100)
+            self.pct = int(self.wins / float(self.games) * 1000)
         elif self.season.draw_option == Season.DRAW_EQ_HALF_WIN:
-            self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 100)
+            self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 1000)
 
     @staticmethod
     def compare_pct(a, b):

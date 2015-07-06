@@ -30,12 +30,6 @@ class Command(BaseCommand):
             default=None,
             help='first date to calculate standings (YYYYmmdd)',
         ),
-        make_option('--force',
-            action='store_true',
-            dest='force',
-            default=False,
-            help='force to re-calculate standings even if already calculated',
-        ),
     )
 
     def handle(self, *args, **options):
@@ -61,16 +55,27 @@ class Command(BaseCommand):
         else:
             enddate = season.end_date
 
-        force = options['force']
-
         standings = {}
-        # TODO populate p_standings
+        s = Standing.objects.filter(
+                date__gte = season.start_date,
+                date__lt = startdate,
+                season = season
+        ).order_by('-date')[0:1]
+
+        if len(s) != 0:
+            l = Standing.objects.filter(
+                    date = s[0].date,
+                    season = season,
+            )
+            for i in l:
+                standings[i.team] = i
+            startdate = s[0].date + datetime.timedelta(days=1)
+
         c_date = startdate;
         while c_date <= enddate:
-            print c_date
-
             scores = Score.objects.filter(date=c_date)
             if len(scores) > 0:
+                print c_date
                 for s in scores:
                     standings.update(Command.apply_score(standings, season, s))
 
