@@ -96,6 +96,10 @@ class Season(models.Model):
         return self.name
 
 class Standing(models.Model):
+    WIN = 'o'
+    LOSS = 'x'
+    DRAW = '-'
+
     season =  models.ForeignKey(Season)
     date = models.DateField(db_index=True)
     team = models.CharField(max_length=255, db_index=True)
@@ -105,7 +109,7 @@ class Standing(models.Model):
     draws = models.SmallIntegerField()
     pct = models.SmallIntegerField()    # PCT * 1000
     gb = models.SmallIntegerField()     # gb * 10
-    l10 = models.SmallIntegerField()
+    l10 = models.CharField(max_length=10)   # o is win, x is loss, - is draw
     streak = models.SmallIntegerField() # + is winning streak, - is losing streak
     home_wins = models.SmallIntegerField()
     home_losses = models.SmallIntegerField()
@@ -115,3 +119,77 @@ class Standing(models.Model):
         unique_together = (
             ('season', 'date', 'team'),
         )
+
+    class TeamNotMatched(Exception):
+        def __init__(self, message):
+            self.message = message
+        def __unicode__(self):
+            return repr(self.message)
+
+    def apply_score(self, score):
+        self.l10 = self.l10[1:10]
+        if self.team == score.home_team:
+            if score.home_score > score.away_score:
+                # Home team wins
+                self.wins += 1
+                self.home_wins += 1
+                self.l10 += Standing.WIN
+                if self.streak >= 0: 
+                    self.streak += 1
+                else:
+                    self.stream = 1
+            elif score.home_score < score.away_score:
+                # Home team loses
+                self.losses += 1
+                self.home_losses += 1
+                self.l10 += Standing.LOSS
+                if self.streak <= 0: 
+                    self.streak -= 1
+                else:
+                    self.stream = -1
+            else:
+                # Draw
+                self.draws += 1
+                self.home_draws += 1
+                self.l10 += Standing.DRAW
+                self.streak = 0
+        elif self.team == score.away_team:
+            if score.home_score < score.away_score:
+                # Away team wins
+                self.wins += 1
+                self.l10 += Standing.WIN
+                if self.streak >= 0: 
+                    self.streak += 1
+                else:
+                    self.stream = 1
+            elif score.home_score > score.away_score:
+                # Away team loses
+                self.losses += 1
+                self.l10 += Standing.LOSS
+                if self.streak <= 0: 
+                    self.streak -= 1
+                else:
+                    self.stream = -1
+            else:
+                # Draw
+                self.draws += 1
+                self.l10 += Standing.DRAW
+                self.streak = 0
+        else:
+            raise Standing.TeamNotMatched(self.team + ' != ' + score.home_team + ' or ' + score.away_team)
+
+        self.date = score.date
+        self.games += 1
+        if self.season.draw_option == Season.DRAW_NOT_INCLUDED:
+            if self.wins + self.losses > 0:
+                self.pct = int(self.wins / float(self.wins + self.losses) * 100)
+            else:
+                self.pct = 0
+        elif self.season.draw_option == Season.DRAW_EQ_LOSS:
+            self.pct = int(self.wins / float(self.games) * 100)
+        elif self.season.draw_option == Season.DRAW_EQ_HALF_WIN:
+            self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 100)
+
+    @staticmethod
+    def compare_pct(a, b):
+        return b.pct - a.pct
