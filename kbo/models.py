@@ -115,6 +115,21 @@ class Standing(models.Model):
     home_losses = models.SmallIntegerField()
     home_draws = models.SmallIntegerField()
 
+    def save(self, *args, **kwargs):
+        try:
+            s = Standing.objects.get(
+                    season = self.season,
+                    date = self.date,
+                    team = self.team,
+            )
+            self.id = s.id
+            kwargs['force_update'] = True
+        except Standing.DoesNotExist as e:
+            kwargs['force_insert'] = True
+            self.id = None  # To make new id using AutoField
+
+        super(Standing, self).save(*args, **kwargs) # Call the "real" save() method.
+
     class Meta:
         unique_together = (
             ('season', 'date', 'team'),
@@ -127,7 +142,9 @@ class Standing(models.Model):
             return repr(self.message)
 
     def apply_score(self, score):
-        self.l10 = self.l10[1:10]
+        if len(self.l10) == 10:
+            self.l10 = self.l10[1:10]
+
         if self.team == score.home_team:
             if score.home_score > score.away_score:
                 # Home team wins
@@ -192,4 +209,7 @@ class Standing(models.Model):
 
     @staticmethod
     def compare_pct(a, b):
-        return b.pct - a.pct
+        r = b.pct - a.pct
+        if r == 0:
+            r = b.wins - a.wins
+        return r

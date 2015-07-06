@@ -78,6 +78,7 @@ class Command(BaseCommand):
                 
                 for k in standings:
                     s = standings[k]
+                    s.date = c_date # if not, date field not updated for teams that had no game on this day
                     s.save()
 
             c_date = c_date + datetime.timedelta(days=1)
