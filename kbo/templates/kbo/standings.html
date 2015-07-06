@@ -1,6 +1,62 @@
 {% extends "kbo/base.html" %}
 
+{% load pipeline %}
+
 {% block kbo_content %}
-standings
+<h2 class="sub-header">Standings</h2>
+<div class="input-group date">
+  <input type="text" class="form-control" value="{{ basedate.year }}/{{ basedate.month }}/{{ basedate.day }}">
+  <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>순위</th>
+        <th>팀</th>
+        <th>경기</th>
+        <th>승</th>
+        <th>무</th>
+        <th>패</th>
+        <th>게임차</th>
+        <th>승률</th>
+        <th>연속</th>
+        <th>최근10경기</th>
+      </tr>
+    </thead>
+
+    <tbody>
+{% for standing in standings %}
+      <tr>
+        <td></td>
+        <td>{{ standing.team }}</td>
+        <td>{{ standing.games }}</td>
+        <td>{{ standing.wins }}</td>
+        <td>{{ standing.draws }}</td>
+        <td>{{ standing.losses }}</td>
+        <td>{{ standing.gb }}</td>
+        <td>{{ standing.pct }}</td>
+        <td>{{ standing.streak }}</td>
+        <td>{{ standing.l10 }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  <table>
+<div>
 {% endblock %}
 
+{% block javascripts %}
+{% javascript 'datepicker' %}
+<script>
+$('.input-group.date').datepicker({
+  format: 'yyyy/mm/dd',
+  startDate: '{{ startDate.year }}/{{ startDate.month }}/{{ startDate.day }}',
+  endDate: '{{ endDate.year }}/{{ endDate.month }}/{{ endDate.day }}',
+  orientation: 'bottom',
+});
+$('.input-group.date').on("changeDate", function(event) {
+    d = new Date($('.input-group.date').datepicker('getDate'))
+    window.location.href = '{% url 'kbo:standings' %}'.concat( d.yyyymmdd() )
+});
+</script>
+{% endblock %}

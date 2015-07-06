@@ -8,4 +8,5 @@ urlpatterns = patterns('',
     url(r'scores/$', views.scores, name='scores'),
     url(r'scores/(?P<basedate>\d+)/$', views.scores, name='scores_on'),
     url(r'standings/$', views.standings, name='standings'),
+    url(r'standings/(?P<basedate>\d+)/$', views.standings, name='standings_on'),
 )
