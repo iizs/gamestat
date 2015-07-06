@@ -15,10 +15,14 @@ def format_gb(value):
 
 @register.filter()
 def format_streak(value):
-    return '{number}{win_loss}'.format(
-        number = abs(value),
-        win_loss = '승' if value > 0 else '패',
-    )
+    if value != 0:
+        ret = '{number}{win_loss}'.format(
+            number = abs(value),
+            win_loss = '승' if value > 0 else '패',
+        )
+    else:
+        ret = '-'
+    return ret
 
 @register.filter()
 def format_l10(value):

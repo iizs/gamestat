@@ -154,7 +154,7 @@ class Standing(models.Model):
                 if self.streak >= 0: 
                     self.streak += 1
                 else:
-                    self.stream = 1
+                    self.streak = 1
             elif score.home_score < score.away_score:
                 # Home team loses
                 self.losses += 1
@@ -163,7 +163,7 @@ class Standing(models.Model):
                 if self.streak <= 0: 
                     self.streak -= 1
                 else:
-                    self.stream = -1
+                    self.streak = -1
             else:
                 # Draw
                 self.draws += 1
@@ -178,7 +178,7 @@ class Standing(models.Model):
                 if self.streak >= 0: 
                     self.streak += 1
                 else:
-                    self.stream = 1
+                    self.streak = 1
             elif score.home_score > score.away_score:
                 # Away team loses
                 self.losses += 1
@@ -186,7 +186,7 @@ class Standing(models.Model):
                 if self.streak <= 0: 
                     self.streak -= 1
                 else:
-                    self.stream = -1
+                    self.streak = -1
             else:
                 # Draw
                 self.draws += 1
