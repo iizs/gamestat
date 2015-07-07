@@ -4,10 +4,43 @@
 {% block kbo_content %}
 
 <h2 class="sub-header">Scores</h2>
-<div class="input-group date">
-  <input type="text" class="form-control" value="{{ basedate.year }}/{{ basedate.month }}/{{ basedate.day }}">
-  <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          <button type="button" class="prevdate btn btn-default" aria-label="Left Align">
+            {% if prevDate %}
+            {{ prevDate | date:'Y/m/d' }} 
+            {% else %}
+            ----/--/--
+            {% endif %}
+            <span class="glyphicon glyphicon-chevron-left"></span>
+          </button>
+        </th>
+        <th>
+          <div class="input-group date">
+            <input type="text" class="form-control" value="{{ basedate | date:'Y/m/d' }}">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+          </div>
+        </th>
+        <th>
+          <button type="button" class="nextdate btn btn-default" aria-label="Left Align">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            {% if nextDate %}
+            {{ nextDate | date:'Y/m/d' }}
+            {% else %}
+            ----/--/--
+            {% endif %}
+          </button>
+        </th>
+      </tr>
+    </thead>
+  </table>
 </div>
+
+{% if scores %}
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
@@ -33,18 +66,34 @@
     </tbody>
   <table>
 <div>
+{% else %}
+경기가 없습니다.
+{% endif %}
 
 {% endblock %}
 
 {% block javascripts %}
 {% javascript 'datepicker' %}
 <script>
+{% if prevDate %}
+$('.btn.prevdate').click(function(event) {
+    window.location.href = '{% url 'kbo:scores' %}'.concat( {{ prevDate | date:'Ymd' }}  )
+})
+{% endif %}
+
+{% if nextDate %}
+$('.btn.nextdate').click(function(event) {
+    window.location.href = '{% url 'kbo:scores' %}'.concat( {{ nextDate | date:'Ymd' }}  )
+})
+{% endif %}
+
 $('.input-group.date').datepicker({
   format: 'yyyy/mm/dd',
   startDate: '{{ startDate.year }}/{{ startDate.month }}/{{ startDate.day }}',
   endDate: '{{ endDate.year }}/{{ endDate.month }}/{{ endDate.day }}',
   orientation: 'bottom',
 });
+
 $('.input-group.date').on("changeDate", function(event) {
     d = new Date($('.input-group.date').datepicker('getDate'))
     window.location.href = '{% url 'kbo:scores' %}'.concat( d.yyyymmdd() )

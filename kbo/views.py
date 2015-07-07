@@ -91,11 +91,28 @@ def scores(request, basedate=None):
         date = latest_score.date
 
     scores = Score.objects.filter(date=date)
+
+    # prevDate for navigation
+    if date == oldest_score.date:
+        prev_date = None
+    else:
+        prev_score = Score.objects.filter(date__lt=date).order_by('-date')[0]
+        prev_date = prev_score.date
+
+    # nextDate for navigation
+    if date == latest_score.date:
+        next_date = None
+    else:
+        next_score = Score.objects.filter(date__gt=date).order_by('date')[0]
+        next_date = next_score.date
+
     template = loader.get_template('kbo/scores.html')
     context = RequestContext(request, {
         'scores' : scores,
         'basedate' : date,
         'startDate' : oldest_score.date,
         'endDate' : latest_score.date,
+        'prevDate' : prev_date,
+        'nextDate' : next_date,
     })
     return HttpResponse(template.render(context))
