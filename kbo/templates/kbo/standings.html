@@ -61,7 +61,7 @@
     <tbody>
 {% for standing in standings %}
       <tr>
-        <td></td>
+        <td>{{ forloop.counter }}</td>
         <td>{{ standing.team }}</td>
         <td>{{ standing.games }}</td>
         <td>{{ standing.wins }}</td>
