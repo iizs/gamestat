@@ -16,6 +16,32 @@ def overview(request):
     context = RequestContext(request, {
     })
     return HttpResponse(template.render(context))
+    
+def graphs(request):
+    latest_standing = Standing.objects.order_by('-date')[0]
+    teams = Standing.objects.filter(date=latest_standing.date).order_by('team')
+
+    standings = Standing.objects.filter(
+        date__gt='2007-05-01',
+        date__lt='2007-11-01',
+    ).order_by('date', 'team')
+
+    data = []
+    row = []
+    date = standings[0].date
+    for s in standings:
+        if date != s.date:
+            data.append(row)
+            row=[]
+            date = s.date
+        row.append(s)
+
+    template = loader.get_template('kbo/graphs.html')
+    context = RequestContext(request, {
+        'data' : data,
+        'teams' : teams,
+    })
+    return HttpResponse(template.render(context))
 
 def standings(request, basedate=None):
     # 데이터가 전혀 존재하지 않는 경우에 대해서는 고민하지 않았다.

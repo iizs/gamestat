@@ -1,0 +1,47 @@
+{% extends "kbo/base.html" %}
+
+{% load kbo_formatters %}
+
+{% block kbo_content %}
+<div id="linechart_material"></div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load('visualization', '1.1', {packages: ['line']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('number', 'Day');
+{% for t in teams %}
+      data.addColumn('number', '{{ t.team }}');
+{% endfor %}
+
+      data.addRows([
+{% for r in data %}
+  [ {{ forloop.counter }}, 
+  {% for e in r %}
+    {{ e.pct | format_pct }},
+  {% endfor %}
+  ],
+{% endfor %}
+      ]);
+
+      var options = {
+        chart: {
+          title: 'Box Office Earnings in First Two Weeks of Opening',
+          subtitle: 'in millions of dollars (USD)'
+        },
+        width: 900,
+        height: 500
+      };
+
+      var chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+      chart.draw(data, options);
+    }
+  </script>
+{% endblock %}
