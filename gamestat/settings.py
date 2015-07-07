@@ -127,6 +127,7 @@ PIPELINE_CSS = {
         'source_filenames': (
             'ui/css/dashboard.css',
             'ui/css/datepicker.css',
+            'kbo/css/kbo.css',
         ),
         'output_filename': 'css/kbo.css',
         'extra_context': {
