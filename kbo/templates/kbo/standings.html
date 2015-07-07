@@ -8,26 +8,36 @@
 
 <div class="table-responsive">
   <table class="table">
-  <thead>
-  <tr>
-  <th>
-<button type="button" class="btn btn-default" aria-label="Left Align">
-  0000/00/00 <span class="glyphicon glyphicon-chevron-left"></span>
-</button>
-</th>
-<th>
-<div class="input-group date">
-  <input type="text" class="form-control" value="{{ basedate.year }}/{{ basedate.month }}/{{ basedate.day }}">
-  <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
-</div>
-</th>
-<th>
-<button type="button" class="btn btn-default" aria-label="Left Align">
-  <span class="glyphicon glyphicon-chevron-right"></span> 0000/00/00 
-</button>
-</th>
-  </tr>
-  </thead>
+    <thead>
+      <tr>
+        <th>
+          <button type="button" class="btn btn-default" aria-label="Left Align">
+            {% if prevDate %}
+            {{ prevDate | date:'Y/m/d' }} 
+            {% else %}
+            ----/--/--
+            {% endif %}
+            <span class="glyphicon glyphicon-chevron-left"></span>
+          </button>
+        </th>
+        <th>
+          <div class="input-group date">
+            <input type="text" class="form-control" value="{{ basedate | date:'Y/m/d' }}">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+          </div>
+        </th>
+        <th>
+          <button type="button" class="btn btn-default" aria-label="Left Align">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            {% if nextDate %}
+            {{ nextDate | date:'Y/m/d' }}
+            {% else %}
+            ----/--/--
+            {% endif %}
+          </button>
+        </th>
+      </tr>
+    </thead>
   </table>
 </div>
 
