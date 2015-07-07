@@ -103,6 +103,7 @@ class Standing(models.Model):
     season =  models.ForeignKey(Season)
     date = models.DateField(db_index=True)
     team = models.CharField(max_length=255, db_index=True)
+    rank = models.SmallIntegerField()
     games = models.SmallIntegerField()
     wins = models.SmallIntegerField()
     losses = models.SmallIntegerField()

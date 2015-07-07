@@ -24,7 +24,7 @@
 {% for r in data %}
   [ {{ forloop.counter }}, 
   {% for e in r %}
-    {{ e.pct | format_pct }},
+    {{ e.rank }},
   {% endfor %}
   ],
 {% endfor %}

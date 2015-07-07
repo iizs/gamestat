@@ -134,6 +134,10 @@ class Command(BaseCommand):
         l.sort(cmp=Standing.compare_pct)
         s1 = l[0]
         s1.gb = 0
+        rank = 1
+        s1.rank = rank
 
         for s in l[1:]:
             s.gb = int((s1.wins - s.wins + s.losses - s1.losses) / 2.0 * 10)
+            rank += 1
+            s.rank = rank
