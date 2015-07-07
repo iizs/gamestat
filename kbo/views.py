@@ -51,15 +51,13 @@ def standings(request, basedate=None):
     if date == oldest_standing.date:
         prev_date = None
     else:
-        prev_standing = Standing.objects.filter(date__lt=date).order_by('-date')[0]
-        prev_date = prev_standing.date
+        prev_date = date - datetime.timedelta(days=1)
 
     # nextDate for navigation
     if date == latest_standing.date:
         next_date = None
     else:
-        next_standing = Standing.objects.filter(date__gt=date).order_by('date')[0]
-        next_date = next_standing.date
+        next_date = date + datetime.timedelta(days=1)
 
     template = loader.get_template('kbo/standings.html')
     context = RequestContext(request, {
@@ -96,15 +94,13 @@ def scores(request, basedate=None):
     if date == oldest_score.date:
         prev_date = None
     else:
-        prev_score = Score.objects.filter(date__lt=date).order_by('-date')[0]
-        prev_date = prev_score.date
+        prev_date = date - datetime.timedelta(days=1)
 
     # nextDate for navigation
     if date == latest_score.date:
         next_date = None
     else:
-        next_score = Score.objects.filter(date__gt=date).order_by('date')[0]
-        next_date = next_score.date
+        next_date = date + datetime.timedelta(days=1)
 
     template = loader.get_template('kbo/scores.html')
     context = RequestContext(request, {
