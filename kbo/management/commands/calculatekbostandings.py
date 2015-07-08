@@ -54,6 +54,12 @@ class Command(BaseCommand):
                 enddate = season.end_date
         else:
             enddate = season.end_date
+    
+        Standing.objects.filter(
+                date__gte = startdate,
+                date__lte = enddate,
+                season = season
+        ).delete()
 
         standings = {}
         s = Standing.objects.filter(
