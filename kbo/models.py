@@ -204,7 +204,12 @@ class Standing(models.Model):
             else:
                 self.pct = 0
         elif self.season.draw_option == Season.DRAW_EQ_LOSS:
-            self.pct = int(self.wins / float(self.games) * 1000)
+            if self.wins + self.losses > 0:
+                self.pct = int(self.wins / float(self.wins + self.losses) * 1000)
+            else:
+                self.pct = 0
+            # 아래 공식이 맞지만, 어째서인지 공식 기록은 위 공식으로 되어있다.
+            #self.pct = int(self.wins / float(self.games) * 1000)
         elif self.season.draw_option == Season.DRAW_EQ_HALF_WIN:
             self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 1000)
 
@@ -214,3 +219,4 @@ class Standing(models.Model):
         if r == 0:
             r = b.wins - a.wins
         return r
+
