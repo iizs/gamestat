@@ -11,7 +11,7 @@
     <thead>
       <tr>
         <th>
-          <button type="button" class="prevdate btn btn-default" aria-label="Left Align">
+          <button type="button" class="prevdate btn btn-default">
             {% if prevDate %}
             {{ prevDate | date:'Y/m/d' }} 
             {% else %}
@@ -27,7 +27,7 @@
           </div>
         </th>
         <th>
-          <button type="button" class="nextdate btn btn-default" aria-label="Left Align">
+          <button type="button" class="nextdate btn btn-default">
             <span class="glyphicon glyphicon-chevron-right"></span>
             {% if nextDate %}
             {{ nextDate | date:'Y/m/d' }}
