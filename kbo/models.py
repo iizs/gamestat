@@ -7,6 +7,7 @@ import datetime
 
 class Score(models.Model):
     date = models.DateField(db_index=True)
+    seq = models.SmallIntegerField()
     home_team = models.CharField(max_length=255, db_index=True)
     away_team = models.CharField(max_length=255, db_index=True)
     home_score = models.SmallIntegerField()
@@ -26,6 +27,15 @@ class Score(models.Model):
             m = re.search('<td class="cont_score">', l)
             if m != None:
                 s = re.sub('<[^>]+>', ' ', l)
+
+                # check if double header
+                m = re.search('\(DH([0-9]+)\)', s)
+                if m != None:
+                    seq = int(m.group(1))
+                else:
+                    seq = 0
+
+                # parse score
                 m = re.search('([^\s]+)\s+([0-9]+)\s*:\s*([0-9]+)\s+([^\s]+)', s)
                 if m != None:
                     try:
@@ -36,6 +46,7 @@ class Score(models.Model):
                             away_team=m.group(1),
                             home_score=int(m.group(3)),
                             away_score=int(m.group(2)),
+                            seq = seq,
                         )
                         s_obj.save()
                     except IntegrityError as e:
@@ -63,7 +74,7 @@ class Score(models.Model):
 
     class Meta:
         unique_together = (
-            ('date', 'home_team', 'away_team'),
+            ('date', 'seq', 'home_team', 'away_team'),
         )
 
 class Season(models.Model):
