@@ -1,0 +1,105 @@
+{% extends "kbo/base.html" %}
+
+{% load pipeline %}
+
+{% block kbo_content %}
+<form action="{% url 'kbo:versus' %}" method="GET">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="col-md-2">
+            팀1
+            </th>
+            <th class="col-md-2">
+            팀2
+            </th>
+            <th class="col-md-3">
+            시작일
+            </th>
+            <th class="col-md-3">
+            종료일
+            </th>
+            <th class="col-md-2">
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+                <input type="text" class="form-control" name="team1" value="{{ team1 }}">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="team2" value="{{ team2 }}">
+            </td>
+            <td class="col-md-3">
+              <div class="input-group date">
+                <input type="text" class="form-control" name="fromdate" value="{{ fromdate }}">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+              </div>
+            </td>
+            <td>
+              <div class="input-group date">
+                <input type="text" class="form-control" name="todate" value="{{ todate }}">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+              </div>
+            </td>
+            <td>
+              <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>
+              </button>
+            </td>
+          </tr>
+        </thead>
+      </table>
+    </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="col-md-3">
+        날짜
+        </th>
+        <th class="col-md-2">
+        Away 
+        </th>
+        <th class="col-md-2">
+        </th>
+        <th class="col-md-1">
+        </th>
+        <th class="col-md-2">
+        </th>
+        <th class="col-md-2">
+        Home
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+{% for score in scores %}
+      <tr>
+        <td>{{ score.date | date:'Y/m/d' }}</td>
+        <td>{{ score.away_team }}</td>
+        <td>{{ score.away_score }}</td>
+        <td>:</td>
+        <td>{{ score.home_score }}</td>
+        <td>{{ score.home_team }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{% javascript 'datepicker' %}
+<script>
+$('.input-group.date').datepicker({
+  format: 'yyyy/mm/dd',
+  startDate: '{{ startDate.year }}/{{ startDate.month }}/{{ startDate.day }}',
+  endDate: '{{ endDate.year }}/{{ endDate.month }}/{{ endDate.day }}',
+  orientation: 'bottom',
+});
+</script>
+{% endblock %}

@@ -13,28 +13,19 @@
 {% block content %}
 <div class="container-fluid">
       <div class="row">
+      <!--
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
+          -->
+        <div class="col-sm-12 col-md-2">
+          <ul class="nav nav-pills nav-stacked">
             <li class="{% active_side 'kbo:scores' %}"><a href="{% url 'kbo:scores' %}">Scores</a></li>
+            <li class="{% active_side 'kbo:versus' %}"><a href="{% url 'kbo:versus' %}">Scores: versus</a></li>
             <li class="{% active_side 'kbo:standings' %}"><a href="{% url 'kbo:standings' %}">Standings</a></li>
             <li class="{% active_side 'kbo:graphs' %}"><a href="{% url 'kbo:graphs' %}">Graphs</a></li>
           </ul>
-          <!--
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item</a></li>
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-            <li><a href="">More navigation</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-          </ul>
-          -->
         </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div class="col-sm-12 col-md-10 main">
             {% block kbo_content %}{% endblock %}
         </div>
       </div>

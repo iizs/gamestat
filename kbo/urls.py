@@ -10,4 +10,5 @@ urlpatterns = patterns('',
     url(r'standings/$', views.standings, name='standings'),
     url(r'standings/(?P<basedate>\d+)/$', views.standings, name='standings_on'),
     url(r'graphs/$', views.graphs, name='graphs'),
+    url(r'versus/$', views.versus, name='versus'),
 )

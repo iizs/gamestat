@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import RequestContext, loader
+from django.db.models import Q
 
 import logging
 import datetime
@@ -11,9 +12,73 @@ from models import Score, Standing
 
 logger = logging.getLogger(__name__)
 
+def _string2date(s, regex='([0-9]{2,4})/([0-9]{2})/([0-9]{2})'):
+    date = None
+    if s != None:
+        m = re.match(regex, str(s))
+        if m != None:
+            year = int(m.group(1))
+            month = int(m.group(2))
+            day = int(m.group(3))
+            if year < 100:
+                year += 2000
+            date = datetime.date(year, month, day)
+    return date
+
 def overview(request):
     template = loader.get_template('kbo/overview.html')
     context = RequestContext(request, {
+    })
+    return HttpResponse(template.render(context))
+
+def versus(request):
+    latest_score = Score.objects.order_by('-date')[0]
+    oldest_score = Score.objects.order_by('date')[0]
+
+    team1 = ''
+    team2 = ''
+    fromdate = '----/--/--'
+    todate = '----/--/--'
+
+    try:
+        team1 = request.GET['team1']
+        team2 = request.GET['team2']
+        fromdate = request.GET['fromdate']
+        todate = request.GET['todate']
+
+        fromdate_date = _string2date(str(fromdate))
+        if fromdate_date == None:
+            fromdate_date = oldest_score
+
+        todate_date = _string2date(str(todate))
+        if todate_date == None:
+            todate_date = latest_score
+
+        scores = Score.objects.filter(
+            Q(
+                date__gt = fromdate_date,
+                date__lt = todate_date, 
+                home_team = team1, 
+                away_team = team2, 
+            ) | Q (
+                date__gt = fromdate_date,
+                date__lt = todate_date, 
+                home_team = team2, 
+                away_team = team1, 
+            )
+        ).order_by('date')
+    except KeyError as e:
+        scores = None
+
+    template = loader.get_template('kbo/versus.html')
+    context = RequestContext(request, {
+        'startDate' : oldest_score.date,
+        'endDate' : latest_score.date,
+        'team1' : team1,
+        'team2' : team2,
+        'fromdate' : fromdate,
+        'todate' : todate,
+        'scores' : scores,
     })
     return HttpResponse(template.render(context))
     
@@ -51,15 +116,7 @@ def standings(request, basedate=None):
     date = None # 화면에 출력할 기준 날짜
 
     # 사용자가 valid한 date를 제공했다면, 그 날짜를 사용하되, 
-    if basedate != None:
-        m = re.match('([0-9]{2,4})([0-9]{2})([0-9]{2})', str(basedate))
-        if m != None:
-            year = int(m.group(1))
-            month = int(m.group(2))
-            day = int(m.group(3))
-            if year < 100:
-                year += 2000
-            date = datetime.date(year, month, day)
+    date = _string2date(str(basedate), regex='([0-9]{2,4})([0-9]{2})([0-9]{2})')
 
     # 서버에 데이터가 존재하는 범위 바깥의 날짜라면, 날짜를 그 안쪽으로 조정하고, 
     if date == None or date > latest_standing.date:
@@ -101,15 +158,7 @@ def scores(request, basedate=None):
     oldest_score = Score.objects.order_by('date')[0]
     date = None
 
-    if basedate != None:
-        m = re.match('([0-9]{2,4})([0-9]{2})([0-9]{2})', str(basedate))
-        if m != None:
-            year = int(m.group(1))
-            month = int(m.group(2))
-            day = int(m.group(3))
-            if year < 100:
-                year += 2000
-            date = datetime.date(year, month, day)
+    date = _string2date(str(basedate), regex='([0-9]{2,4})([0-9]{2})([0-9]{2})')
 
     if date == None:
         date = latest_score.date
@@ -126,7 +175,7 @@ def scores(request, basedate=None):
     if date == latest_score.date:
         next_date = None
     else:
-        next_date = date + datetime.timedelta(days=1)
+        next_date = date + datetime.timedelta(days=2)
 
     template = loader.get_template('kbo/scores.html')
     context = RequestContext(request, {
