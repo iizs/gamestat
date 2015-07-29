@@ -54,19 +54,32 @@ def versus(request):
         if todate_date == None:
             todate_date = latest_score
 
-        scores = Score.objects.filter(
-            Q(
-                date__gt = fromdate_date,
-                date__lt = todate_date, 
-                home_team = team1, 
-                away_team = team2, 
-            ) | Q (
-                date__gt = fromdate_date,
-                date__lt = todate_date, 
-                home_team = team2, 
-                away_team = team1, 
-            )
-        ).order_by('date')
+        if team2 != '' :
+            scores = Score.objects.filter(
+                Q(
+                    date__gt = fromdate_date,
+                    date__lt = todate_date, 
+                    home_team = team1, 
+                    away_team = team2, 
+                ) | Q (
+                    date__gt = fromdate_date,
+                    date__lt = todate_date, 
+                    home_team = team2, 
+                    away_team = team1, 
+                )
+            ).order_by('date')
+        else:
+            scores = Score.objects.filter(
+                Q(
+                    date__gt = fromdate_date,
+                    date__lt = todate_date, 
+                    home_team = team1, 
+                ) | Q (
+                    date__gt = fromdate_date,
+                    date__lt = todate_date, 
+                    away_team = team1, 
+                )
+            ).order_by('date')
     except KeyError as e:
         scores = None
 
