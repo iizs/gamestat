@@ -39,6 +39,9 @@ class Score(models.Model):
                 m = re.search('([^\s]+)\s+([0-9]+)\s*:\s*([0-9]+)\s+([^\s]+)', s)
                 if m != None:
                     try:
+                        if m.group(1) in [u'이스턴', u'웨스턴', u'동군', u'서군', u'드림', u'나눔' ]:
+                            continue
+
                         date = datetime.date(year, month, day)
                         s_obj = Score( 
                             date=date,
@@ -55,6 +58,7 @@ class Score(models.Model):
                                 date=date, 
                                 home_team=m.group(4),
                                 away_team=m.group(1),
+                                seq = seq,
                             )
 
                             if s_org.home_score != s_obj.home_score or s_org.away_score != s_obj.away_score:
@@ -215,12 +219,7 @@ class Standing(models.Model):
             else:
                 self.pct = 0
         elif self.season.draw_option == Season.DRAW_EQ_LOSS:
-            if self.wins + self.losses > 0:
-                self.pct = int(self.wins / float(self.wins + self.losses) * 1000)
-            else:
-                self.pct = 0
-            # 아래 공식이 맞지만, 어째서인지 공식 기록은 위 공식으로 되어있다.
-            #self.pct = int(self.wins / float(self.games) * 1000)
+            self.pct = int(self.wins / float(self.games) * 1000)
         elif self.season.draw_option == Season.DRAW_EQ_HALF_WIN:
             self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 1000)
 
