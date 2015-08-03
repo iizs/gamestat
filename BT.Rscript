@@ -1,0 +1,6 @@
+suppressMessages(library(BradleyTerry2))
+filename <- commandArgs(trailingOnly = TRUE)
+match_records <- read.table(filename, sep=" ", header=TRUE)
+match_model <- BTm(cbind(home.wins, away.wins), home.team, away.team, data = match_records, id = "team")
+BTabilities(match_model)
+
