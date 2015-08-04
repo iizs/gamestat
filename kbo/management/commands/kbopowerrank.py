@@ -12,6 +12,7 @@ import subprocess
 import string
 import os
 import re
+import math
 
 class Command(BaseCommand):
     help = 'Print KBO match records between teams'
@@ -57,14 +58,88 @@ class Command(BaseCommand):
         mr_file = os.path.join(settings.BASE_DIR, 'match_record')
         mr = self.generate_match_record(season, enddate, mr_file)
         pr = self.generate_power_rankings(season, enddate, mr_file)
+        self.generate_exp_standings(season, enddate, mr, pr)
         #os.unlink(mr_file)
+
+    def generate_exp_standings(self, season, basedate, mr, pr):
+        es = {}
+        alt_standing = Standing.objects.filter(date__lt=basedate).order_by('-date')[0]
+        standings = Standing.objects.filter(date=alt_standing.date)
+        for s in standings:
+            es[s.team] = ExpStanding(
+                power_ranking = pr[s.team.encode('utf8')],
+                rank = 0,
+                games = s.games,
+                wins = s.wins,
+                losses = s.losses,
+                draws = s.draws,
+                pct = 0,
+                gb = 0,
+            )
+
+        teams = pr.keys()
+        for a in range(0, len(teams)):
+            for b in range(a+1, len(teams)):
+                team_a = teams[a].decode('utf8')
+                team_b = teams[b].decode('utf8')
+                pr_a = pr[team_a.encode('utf8')]
+                pr_b = pr[team_b.encode('utf8')]
+                e = math.exp( ( pr_a.power - pr_b.power ) / float(1000000) )
+                prob_a_over_b = e / ( 1 + e )
+
+                a_win = mr[team_a][team_b][0] + mr[team_b][team_a][1]
+                b_win = mr[team_a][team_b][1] + mr[team_b][team_a][0]
+                draw = mr[team_a][team_b][2] + mr[team_b][team_a][2]
+
+                remain_games = season.games_per_team / ( season.n_teams - 1 ) - a_win - b_win - draw
+                exp_win_a = int(round(remain_games * prob_a_over_b))
+                exp_win_b = remain_games - exp_win_a
+                
+                #print '{team_a} ({power_a:0.6f}) v {team_b} ({power_b:0.6f}) : {w}-{l}-{d} with prob({prob:0.5f}) in {remain_games} games {exp_win_a}-{exp_win_b}'.format(
+                #    team_a = team_a.encode('utf8'),
+                #    team_b = team_b.encode('utf8'),
+                #    w = a_win,
+                #    l = b_win,
+                #    d = draw,
+                #    power_a = pr_a.power / float(1000000),
+                #    power_b = pr_b.power / float(1000000),
+                #    prob = prob_a_over_b,
+                #    remain_games = remain_games,
+                #    exp_win_a = exp_win_a,
+                #    exp_win_b = exp_win_b,
+                #)
+
+                es_a = es[team_a]
+                es_b = es[team_b]
+
+                es_a.wins += exp_win_a
+                es_a.losses += exp_win_b
+                es_a.games += remain_games
+
+                es_b.wins += exp_win_b
+                es_b.losses += exp_win_a
+                es_b.games += remain_games
+
+        Command.calculate_gb(es)
+        for k in es:
+            es[k].save()
+            #print '{team} {g} {w}-{l}-{d} {r} {pct} {gb}'.format(
+                #team = es[k].power_ranking.team,
+                #g = es[k].games,
+                #w = es[k].wins,
+                #l = es[k].losses,
+                #d = es[k].draws,
+                #r = es[k].rank,
+                #pct = es[k].pct,
+                #gb = es[k].gb,
+            #)
 
     def generate_power_rankings(self, season, basedate, mr_file):
         R_script_file = os.path.join(settings.BASE_DIR, 'BT.Rscript')
         out = subprocess.check_output(["Rscript", R_script_file, mr_file])
 
         n_teams = 0
-        pr = []
+        pr = {}
         r = re.compile('^([^\s]+)\s+([\d.-]+)\s+', re.UNICODE)
         for l in string.split(out, '\n'):
             m = r.match(l)
@@ -76,13 +151,13 @@ class Command(BaseCommand):
                     team = m.group(1),
                     power = int(float(m.group(2)) * 1000000),
                 )
-                pr.append(o)
+                pr[m.group(1)] = o
 
         if n_teams != season.n_teams:
             raise Command.NotEnoughData('invalid R execution result')
 
-        for o in pr:
-            o.save()
+        for k in pr:
+            pr[k].save()
 
         return pr
     
@@ -141,5 +216,24 @@ class Command(BaseCommand):
 
         return mr
 
+    @staticmethod
+    def calculate_gb(exp_standings):
+        l = []
+        for k in exp_standings:
+            es = exp_standings[k]
+
+            es.pct = Standing.calculate_pct(es, es.power_ranking.season) 
+            l.append(es)
+
+        l.sort(cmp=Standing.compare_pct)
+        s1 = l[0]
+        s1.gb = 0
+        rank = 1
+        s1.rank = rank
+
+        for s in l[1:]:
+            s.gb = int((s1.wins - s.wins + s.losses - s1.losses) / 2.0 * 10)
+            rank += 1
+            s.rank = rank
 
 

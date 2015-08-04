@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from models import Score, Season, Standing, PowerRanking
+from models import Score, Season, Standing, PowerRanking, ExpStanding
 
 class ScoreAdmin(admin.ModelAdmin):
     list_display = (
@@ -45,8 +45,31 @@ class PowerRankingAdmin(admin.ModelAdmin):
     def power_as_float(self, obj):
         return '{f:0.6f}'.format(f = obj.power / float(1000000))
     power_as_float.short_description = 'Power'
+
+class ExpStandingAdmin(admin.ModelAdmin):
+    list_display = (
+        'season',
+        'date',
+        'team',
+        'games',
+        'wins',
+        'losses',
+        'draws',
+        'pct',
+        'gb',
+    )
+
+    def season(self, obj):
+        return obj.power_ranking.season
+
+    def date(self, obj):
+        return obj.power_ranking.date
+
+    def team(self, obj):
+        return obj.power_ranking.team
     
 admin.site.register(Score, ScoreAdmin)
 admin.site.register(Season, SeasonAdmin)
 admin.site.register(Standing, StandingAdmin)
 admin.site.register(PowerRanking, PowerRankingAdmin)
+admin.site.register(ExpStanding, ExpStandingAdmin)

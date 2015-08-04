@@ -214,15 +214,26 @@ class Standing(models.Model):
 
         self.date = score.date
         self.games += 1
-        if self.season.draw_option == Season.DRAW_NOT_INCLUDED:
-            if self.wins + self.losses > 0:
-                self.pct = int(self.wins / float(self.wins + self.losses) * 1000)
+        self.pct = Standing.calculate_pct(self)
+
+    @staticmethod
+    def calculate_pct(s, season=None):
+        if season == None:
+            season = s.season
+
+        if season.draw_option == Season.DRAW_NOT_INCLUDED:
+            if s.wins + s.losses > 0:
+                pct = int(s.wins / float(s.wins + s.losses) * 1000)
             else:
-                self.pct = 0
-        elif self.season.draw_option == Season.DRAW_EQ_LOSS:
-            self.pct = int(self.wins / float(self.games) * 1000)
-        elif self.season.draw_option == Season.DRAW_EQ_HALF_WIN:
-            self.pct = int((self.wins + 0.5 * self.draws) / float(self.games) * 1000)
+                pct = 0
+        elif season.draw_option == Season.DRAW_EQ_LOSS:
+            pct = int(s.wins / float(s.games) * 1000)
+        elif season.draw_option == Season.DRAW_EQ_HALF_WIN:
+            pct = int((s.wins + 0.5 * s.draws) / float(s.games) * 1000)
+        else:
+            pct = None
+
+        return pct
 
     @staticmethod
     def compare_pct(a, b):
