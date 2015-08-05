@@ -29,7 +29,14 @@ class Command(BaseCommand):
             type='string',
             dest='enddate',
             default=None,
-            help='last date to calculate match records (YYYYmmdd)',
+            help='last date to calculate power rank (YYYYmmdd)',
+        ),
+        make_option('--start-date',
+            action='store',
+            type='string',
+            dest='startdate',
+            default=None,
+            help='first date to calculate power rank (YYYYmmdd)',
         ),
     )
 
@@ -48,6 +55,13 @@ class Command(BaseCommand):
         except Season.DoesNotExist as e:
             raise CommandError('SEASON not found')
 
+        if options['startdate'] != None:
+            startdate = datetime.datetime.strptime(options['startdate'], '%Y%m%d').date()
+            if startdate < season.start_date:
+                startdate = season.start_date
+        else:
+            startdate = season.start_date
+
         if options['enddate'] != None:
             enddate = datetime.datetime.strptime(options['enddate'], '%Y%m%d').date()
             if enddate > season.end_date:
@@ -55,11 +69,19 @@ class Command(BaseCommand):
         else:
             enddate = season.end_date
 
-        mr_file = os.path.join(settings.BASE_DIR, 'match_record')
-        mr = self.generate_match_record(season, enddate, mr_file)
-        pr = self.generate_power_rankings(season, enddate, mr_file)
-        self.generate_exp_standings(season, enddate, mr, pr)
-        #os.unlink(mr_file)
+        c_date = startdate;
+        while c_date <= enddate:
+            try:
+                print c_date
+                mr_file = os.path.join(settings.BASE_DIR, 'match_record')
+                mr = self.generate_match_record(season, c_date, mr_file)
+                pr = self.generate_power_rankings(season, c_date, mr_file)
+                self.generate_exp_standings(season, c_date, mr, pr)
+            except Command.NotEnoughData as e:
+                print '{date} skipped'.format(date=c_date)
+            finally:
+                c_date = c_date + datetime.timedelta(days=1)
+                #os.unlink(mr_file)
 
     def generate_exp_standings(self, season, basedate, mr, pr):
         es = {}
@@ -95,20 +117,6 @@ class Command(BaseCommand):
                 exp_win_a = int(round(remain_games * prob_a_over_b))
                 exp_win_b = remain_games - exp_win_a
                 
-                #print '{team_a} ({power_a:0.6f}) v {team_b} ({power_b:0.6f}) : {w}-{l}-{d} with prob({prob:0.5f}) in {remain_games} games {exp_win_a}-{exp_win_b}'.format(
-                #    team_a = team_a.encode('utf8'),
-                #    team_b = team_b.encode('utf8'),
-                #    w = a_win,
-                #    l = b_win,
-                #    d = draw,
-                #    power_a = pr_a.power / float(1000000),
-                #    power_b = pr_b.power / float(1000000),
-                #    prob = prob_a_over_b,
-                #    remain_games = remain_games,
-                #    exp_win_a = exp_win_a,
-                #    exp_win_b = exp_win_b,
-                #)
-
                 es_a = es[team_a]
                 es_b = es[team_b]
 
@@ -123,16 +131,6 @@ class Command(BaseCommand):
         Command.calculate_gb(es)
         for k in es:
             es[k].save()
-            #print '{team} {g} {w}-{l}-{d} {r} {pct} {gb}'.format(
-                #team = es[k].power_ranking.team,
-                #g = es[k].games,
-                #w = es[k].wins,
-                #l = es[k].losses,
-                #d = es[k].draws,
-                #r = es[k].rank,
-                #pct = es[k].pct,
-                #gb = es[k].gb,
-            #)
 
     def generate_power_rankings(self, season, basedate, mr_file):
         R_script_file = os.path.join(settings.BASE_DIR, 'BT.Rscript')
