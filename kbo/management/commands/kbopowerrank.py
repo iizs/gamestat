@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
     def generate_exp_standings(self, season, basedate, mr, pr):
         es = {}
-        alt_standing = Standing.objects.filter(date__lt=basedate).order_by('-date')[0]
+        alt_standing = Standing.objects.filter(date__lte=basedate).order_by('-date')[0]
         standings = Standing.objects.filter(date=alt_standing.date)
         for s in standings:
             es[s.team] = ExpStanding(
@@ -185,7 +185,7 @@ class Command(BaseCommand):
             c_date = c_date + datetime.timedelta(days=1)
 
         teams = []
-        alt_standing = Standing.objects.filter(date__lt=basedate).order_by('-date')[0]
+        alt_standing = Standing.objects.filter(date__lte=basedate).order_by('-date')[0]
         standings = Standing.objects.filter(date=alt_standing.date)
         for s in standings:
             teams.append(s.team)
