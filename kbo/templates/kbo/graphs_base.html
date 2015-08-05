@@ -1,0 +1,69 @@
+{% extends "kbo/base.html" %}
+
+{% load pipeline %}
+{% load kbo_formatters %}
+
+{% block kbo_content %}
+<form action="{% url 'kbo:graphs' %}" method="GET">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="col-md-4">
+            Type
+            </th>
+            <th class="col-md-3">
+            시작일
+            </th>
+            <th class="col-md-3">
+            종료일
+            </th>
+            <th class="col-md-2">
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+                <select class="form-control" name="graph_type">
+                  <option value="standings"{% if graph_type == 'standings' %} seleced{% endif %}>Standings</option>
+                  <option value="exp_standings"{% if graph_type == 'exp_standings' %} seleced{% endif %}>Exp.Standings</option>
+                </select>
+            </td>
+            <td class="col-md-3">
+              <div class="input-group date">
+                <input type="text" class="form-control" name="fromdate" value="{{ fromdate }}">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+              </div>
+            </td>
+            <td>
+              <div class="input-group date">
+                <input type="text" class="form-control" name="todate" value="{{ todate }}">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+              </div>
+            </td>
+            <td>
+              <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>
+              </button>
+            </td>
+          </tr>
+        </thead>
+      </table>
+    </div>
+</form>
+{% block graphs_content %}{% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+{% javascript 'datepicker' %}
+<script>
+$('.input-group.date').datepicker({
+  format: 'yyyy/mm/dd',
+  startDate: '{{ startDate.year }}/{{ startDate.month }}/{{ startDate.day }}',
+  endDate: '{{ endDate.year }}/{{ endDate.month }}/{{ endDate.day }}',
+  orientation: 'bottom',
+});
+</script>
+{% block graphs_js %}{% endblock %}
+{% endblock %}

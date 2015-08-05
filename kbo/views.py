@@ -96,28 +96,46 @@ def versus(request):
     return HttpResponse(template.render(context))
     
 def graphs(request):
-    latest_standing = Standing.objects.order_by('-date')[0]
-    teams = Standing.objects.filter(date=latest_standing.date).order_by('team')
+    latest_score = Score.objects.order_by('-date')[0]
+    oldest_score = Score.objects.order_by('date')[0]
+    try:
+        fromdate = request.GET['fromdate']
+        todate = request.GET['todate']
+        g_type = request.GET['graph_type']
+    except KeyError as e:
+        fromdate = '----/--/--'
+        todate = '----/--/--'
+        g_type = 'standings'
 
-    standings = Standing.objects.filter(
-        date__gt='2007-05-01',
-        date__lt='2007-11-01',
-    ).order_by('date', 'team')
+    #latest_standing = Standing.objects.order_by('-date')[0]
+    #teams = Standing.objects.filter(date=latest_standing.date).order_by('team')
 
-    data = []
-    row = []
-    date = standings[0].date
-    for s in standings:
-        if date != s.date:
-            data.append(row)
-            row=[]
-            date = s.date
-        row.append(s)
+    #standings = Standing.objects.filter(
+        #date__gt='2007-05-01',
+        #date__lt='2007-11-01',
+    #).order_by('date', 'team')
 
-    template = loader.get_template('kbo/graphs.html')
+    #data = []
+    #row = []
+    #date = standings[0].date
+    #for s in standings:
+        #if date != s.date:
+            #data.append(row)
+            #row=[]
+            #date = s.date
+        #row.append(s)
+
+    template = loader.get_template('kbo/graphs_base.html')
     context = RequestContext(request, {
-        'data' : data,
-        'teams' : teams,
+        'graph_type' : g_type,
+        #'data' : data,
+        #'teams' : teams,
+        #'startDate' : oldest_score.date,
+        #'endDate' : latest_score.date,
+        'fromdate' : fromdate,
+        'todate' : todate,
+        'startDate' : oldest_score.date,
+        'endDate' : latest_score.date,
     })
     return HttpResponse(template.render(context))
 
