@@ -242,34 +242,11 @@ class Standing(models.Model):
             r = b.wins - a.wins
         return r
 
-class PowerRanking(models.Model):
+class ExpStanding(models.Model):
     season =  models.ForeignKey(Season)
     date = models.DateField(db_index=True)
     team = models.CharField(max_length=255, db_index=True)
     power = models.IntegerField()       # * 1,000,000
-
-    def save(self, *args, **kwargs):
-        try:
-            s = PowerRanking.objects.get(
-                    season = self.season,
-                    date = self.date,
-                    team = self.team,
-            )
-            self.id = s.id
-            kwargs['force_update'] = True
-        except PowerRanking.DoesNotExist as e:
-            kwargs['force_insert'] = True
-            self.id = None  # To make new id using AutoField
-
-        super(PowerRanking, self).save(*args, **kwargs) # Call the "real" save() method.
-
-    class Meta:
-        unique_together = (
-            ('season', 'date', 'team'),
-        )
-
-class ExpStanding(models.Model):
-    power_ranking = models.ForeignKey(PowerRanking)
 
     rank = models.SmallIntegerField()
     games = models.SmallIntegerField()
@@ -279,10 +256,17 @@ class ExpStanding(models.Model):
     pct = models.SmallIntegerField()    # PCT * 1000
     gb = models.SmallIntegerField()     # gb * 10
 
+    class Meta:
+        unique_together = (
+            ('season', 'date', 'team'),
+        )
+
     def save(self, *args, **kwargs):
         try:
             s = ExpStanding.objects.get(
-                    power_ranking = self.power_ranking,
+                    season = self.season,
+                    date = self.date,
+                    team = self.team,
             )
             self.id = s.id
             kwargs['force_update'] = True

@@ -8,7 +8,7 @@ import logging
 import datetime
 import re
 
-from models import Score, Standing
+from models import Score, Standing, ExpStanding, Season
 
 logger = logging.getLogger(__name__)
 
@@ -48,22 +48,22 @@ def versus(request):
 
         fromdate_date = _string2date(str(fromdate))
         if fromdate_date == None:
-            fromdate_date = oldest_score
+            fromdate_date = oldest_score.date
 
         todate_date = _string2date(str(todate))
         if todate_date == None:
-            todate_date = latest_score
+            todate_date = latest_score.date
 
         if team2 != '' :
             scores = Score.objects.filter(
                 Q(
-                    date__gt = fromdate_date,
-                    date__lt = todate_date, 
+                    date__gte = fromdate_date,
+                    date__lte = todate_date, 
                     home_team = team1, 
                     away_team = team2, 
                 ) | Q (
-                    date__gt = fromdate_date,
-                    date__lt = todate_date, 
+                    date__gte = fromdate_date,
+                    date__lte = todate_date, 
                     home_team = team2, 
                     away_team = team1, 
                 )
@@ -71,12 +71,12 @@ def versus(request):
         else:
             scores = Score.objects.filter(
                 Q(
-                    date__gt = fromdate_date,
-                    date__lt = todate_date, 
+                    date__gte = fromdate_date,
+                    date__lte = todate_date, 
                     home_team = team1, 
                 ) | Q (
-                    date__gt = fromdate_date,
-                    date__lt = todate_date, 
+                    date__gte = fromdate_date,
+                    date__lte = todate_date, 
                     away_team = team1, 
                 )
             ).order_by('date')
@@ -94,10 +94,90 @@ def versus(request):
         'scores' : scores,
     })
     return HttpResponse(template.render(context))
-    
+
+def _graphs_exp_standings(request, fromdate, todate):
+    fromdate_date = _string2date(str(fromdate))
+    if fromdate_date == None:
+        fromdate_date = ExpStanding.objects.order_by('date')[0].date
+
+    todate_date = _string2date(str(todate))
+    if todate_date == None:
+        todate_date = ExpStanding.objects.order_by('-date')[0].date
+
+    teams = ExpStanding.objects.filter(date=todate_date).order_by('rank')
+    if len(teams) == 0:
+        alternative_standing = ExpStanding.objects.filter(date__lt=todate_date).order_by('-date')[0]
+        teams = ExpStanding.objects.filter(date=alternative_standing.date).order_by('rank')
+
+    index = []
+    for t in teams:
+        index.append(t.team)
+
+    standings = ExpStanding.objects.filter(
+        date__gte=fromdate_date,
+        date__lte=todate_date,
+        season = teams[0].season,
+    ).order_by('date', 'rank')
+
+    data = []
+    row = []
+    date = standings[0].date
+    for s in standings:
+        if date != s.date:
+            data.append(row)
+            row=[]
+            date = s.date
+        row.append(s)
+    template = loader.get_template('kbo/graphs_standings_pct.html')
+    title = "ExpStandings"
+    subtitle = "pct"
+    return (index, data, template, title, subtitle)
+
+def _graphs_standings(request, fromdate, todate):
+    fromdate_date = _string2date(str(fromdate))
+    if fromdate_date == None:
+        fromdate_date = Standing.objects.order_by('date')[0].date
+
+    todate_date = _string2date(str(todate))
+    if todate_date == None:
+        todate_date = Standing.objects.order_by('-date')[0].date
+
+    teams = Standing.objects.filter(date=todate_date).order_by('rank')
+    if len(teams) == 0:
+        alternative_standing = Standing.objects.filter(date__lt=todate_date).order_by('-date')[0]
+        teams = Standing.objects.filter(date=alternative_standing.date).order_by('rank')
+
+    index = []
+    for t in teams:
+        index.append(t.team)
+
+    standings = Standing.objects.filter(
+        date__gte=fromdate_date,
+        date__lte=todate_date,
+        season = teams[0].season,
+    ).order_by('date', 'rank')
+
+    data = []
+    row = []
+    date = standings[0].date
+    for s in standings:
+        if date != s.date:
+            data.append(row)
+            row=[]
+            date = s.date
+        row.append(s)
+    template = loader.get_template('kbo/graphs_standings_pct.html')
+    title = "Standings"
+    subtitle = "pct"
+    return (index, data, template, title, subtitle)
+
+
 def graphs(request):
     latest_score = Score.objects.order_by('-date')[0]
     oldest_score = Score.objects.order_by('date')[0]
+    seasons = Season.objects.all()
+    template = loader.get_template('kbo/graphs_base.html')
+
     try:
         fromdate = request.GET['fromdate']
         todate = request.GET['todate']
@@ -105,33 +185,26 @@ def graphs(request):
     except KeyError as e:
         fromdate = '----/--/--'
         todate = '----/--/--'
-        g_type = 'standings'
+        g_type = ''
 
-    #latest_standing = Standing.objects.order_by('-date')[0]
-    #teams = Standing.objects.filter(date=latest_standing.date).order_by('team')
+    if g_type in ['standings_pct']:
+        (index, data, template, title, subtitle) = _graphs_standings(request, fromdate, todate)
+    elif g_type in ['exp_standings_pct']:
+        (index, data, template, title, subtitle) = _graphs_exp_standings(request, fromdate, todate)
+    else :
+        index = []
+        data = []
+        template = loader.get_template('kbo/graphs_standings_pct.html')
+        title = ''
+        subtitle = ''
 
-    #standings = Standing.objects.filter(
-        #date__gt='2007-05-01',
-        #date__lt='2007-11-01',
-    #).order_by('date', 'team')
-
-    #data = []
-    #row = []
-    #date = standings[0].date
-    #for s in standings:
-        #if date != s.date:
-            #data.append(row)
-            #row=[]
-            #date = s.date
-        #row.append(s)
-
-    template = loader.get_template('kbo/graphs_base.html')
     context = RequestContext(request, {
         'graph_type' : g_type,
-        #'data' : data,
-        #'teams' : teams,
-        #'startDate' : oldest_score.date,
-        #'endDate' : latest_score.date,
+        'seasons' : seasons,
+        'data' : data,
+        'index' : index,
+        'title' : title,
+        'subtitle' : subtitle,
         'fromdate' : fromdate,
         'todate' : todate,
         'startDate' : oldest_score.date,

@@ -25,10 +25,12 @@
         <tbody>
           <tr>
             <td>
+              <div class="form-group">
                 <select class="form-control" name="graph_type">
-                  <option value="standings"{% if graph_type == 'standings' %} seleced{% endif %}>Standings</option>
-                  <option value="exp_standings"{% if graph_type == 'exp_standings' %} seleced{% endif %}>Exp.Standings</option>
+                  <option value="standings_pct"{% if graph_type == 'standings_pct' %} selected{% endif %}>Standings (pct)</option>
+                  <option value="exp_standings_pct"{% if graph_type == 'exp_standings_pct' %} selected{% endif %}>Exp.Standings (pct)</option>
                 </select>
+              </div>
             </td>
             <td class="col-md-3">
               <div class="input-group date">
@@ -65,5 +67,6 @@ $('.input-group.date').datepicker({
   orientation: 'bottom',
 });
 </script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 {% block graphs_js %}{% endblock %}
 {% endblock %}

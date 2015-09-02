@@ -5,7 +5,7 @@ from django.conf import settings
 
 from optparse import make_option
 
-from kbo.models import Score, Season, Standing, PowerRanking, ExpStanding
+from kbo.models import Score, Season, Standing, ExpStanding
 
 import datetime
 import subprocess
@@ -84,20 +84,9 @@ class Command(BaseCommand):
                 #os.unlink(mr_file)
 
     def generate_exp_standings(self, season, basedate, mr, pr):
-        es = {}
+        #es = {}
         alt_standing = Standing.objects.filter(date__lte=basedate).order_by('-date')[0]
         standings = Standing.objects.filter(date=alt_standing.date)
-        for s in standings:
-            es[s.team] = ExpStanding(
-                power_ranking = pr[s.team.encode('utf8')],
-                rank = 0,
-                games = s.games,
-                wins = s.wins,
-                losses = s.losses,
-                draws = s.draws,
-                pct = 0,
-                gb = 0,
-            )
 
         teams = pr.keys()
         for a in range(0, len(teams)):
@@ -117,24 +106,26 @@ class Command(BaseCommand):
                 exp_win_a = int(round(remain_games * prob_a_over_b))
                 exp_win_b = remain_games - exp_win_a
                 
-                es_a = es[team_a]
-                es_b = es[team_b]
+                #es_a = es[team_a]
+                #es_b = es[team_b]
 
-                es_a.wins += exp_win_a
-                es_a.losses += exp_win_b
-                es_a.games += remain_games
+                pr_a.wins += exp_win_a
+                pr_a.losses += exp_win_b
+                pr_a.games += remain_games
 
-                es_b.wins += exp_win_b
-                es_b.losses += exp_win_a
-                es_b.games += remain_games
+                pr_b.wins += exp_win_b
+                pr_b.losses += exp_win_a
+                pr_b.games += remain_games
 
-        Command.calculate_gb(es)
-        for k in es:
-            es[k].save()
+        Command.calculate_gb(pr)
+        for k in pr:
+            pr[k].save()
 
     def generate_power_rankings(self, season, basedate, mr_file):
         R_script_file = os.path.join(settings.BASE_DIR, 'BT.Rscript')
         out = subprocess.check_output(["Rscript", R_script_file, mr_file])
+
+        alt_standing = Standing.objects.filter(date__lte=basedate).order_by('-date')[0]
 
         n_teams = 0
         pr = {}
@@ -143,11 +134,19 @@ class Command(BaseCommand):
             m = r.match(l)
             if m != None:
                 n_teams += 1
-                o = PowerRanking(
+                s = Standing.objects.get(date=alt_standing.date, team= m.group(1))
+                o = ExpStanding(
                     season = season,
                     date = basedate,
                     team = m.group(1),
                     power = int(float(m.group(2)) * 1000000),
+                    rank = 0,
+                    games = s.games,
+                    wins = s.wins,
+                    losses = s.losses,
+                    draws = s.draws,
+                    pct = 0,
+                    gb = 0,
                 )
                 pr[m.group(1)] = o
 
@@ -220,7 +219,7 @@ class Command(BaseCommand):
         for k in exp_standings:
             es = exp_standings[k]
 
-            es.pct = Standing.calculate_pct(es, es.power_ranking.season) 
+            es.pct = Standing.calculate_pct(es, es.season) 
             l.append(es)
 
         l.sort(cmp=Standing.compare_pct)

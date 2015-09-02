@@ -1,13 +1,12 @@
-{% extends "kbo/base.html" %}
+{% extends "kbo/graphs_base.html" %}
 
 {% load kbo_formatters %}
 
-{% block kbo_content %}
+{% block graphs_content %}
 <div id="linechart_material"></div>
 {% endblock %}
 
-{% block javascripts %}
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% block graphs_js %}
 <script type="text/javascript">
     google.load('visualization', '1.1', {packages: ['line']});
     google.setOnLoadCallback(drawChart);
@@ -16,15 +15,15 @@
 
       var data = new google.visualization.DataTable();
       data.addColumn('number', 'Day');
-{% for t in teams %}
-      data.addColumn('number', '{{ t.team }}');
+{% for i in index %}
+      data.addColumn('number', '{{ i }}');
 {% endfor %}
 
       data.addRows([
 {% for r in data %}
   [ {{ forloop.counter }}, 
   {% for e in r %}
-    {{ e.rank }},
+    {{ e.pct }},
   {% endfor %}
   ],
 {% endfor %}
@@ -32,8 +31,8 @@
 
       var options = {
         chart: {
-          title: 'Box Office Earnings in First Two Weeks of Opening',
-          subtitle: 'in millions of dollars (USD)'
+          title: '{{ title }}',
+          subtitle: '{{ subtitle }}'
         },
         width: 900,
         height: 500
