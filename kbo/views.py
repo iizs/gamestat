@@ -95,14 +95,20 @@ def versus(request):
     })
     return HttpResponse(template.render(context))
 
-def _graphs_exp_standings(request, fromdate, todate):
+def _get_dates(season, fromdate, todate):
     fromdate_date = _string2date(str(fromdate))
-    if fromdate_date == None:
-        fromdate_date = ExpStanding.objects.order_by('date')[0].date
-
     todate_date = _string2date(str(todate))
-    if todate_date == None:
-        todate_date = ExpStanding.objects.order_by('-date')[0].date
+    s = Season.objects.get(name=season)
+
+    if fromdate_date == None or fromdate_date < s.start_date:
+        fromdate_date = s.start_date
+    if todate_date == None or todate_date < s.end_date:
+        todate_date = s.end_date
+
+    return (fromdate_date, todate_date)
+
+def _graphs_exp_standings(request, season, fromdate, todate):
+    (fromdate_date, todate_date) = _get_dates(season, fromdate, todate)
 
     teams = ExpStanding.objects.filter(date=todate_date).order_by('rank')
     if len(teams) == 0:
@@ -133,14 +139,8 @@ def _graphs_exp_standings(request, fromdate, todate):
     subtitle = "pct"
     return (index, data, template, title, subtitle)
 
-def _graphs_standings(request, fromdate, todate):
-    fromdate_date = _string2date(str(fromdate))
-    if fromdate_date == None:
-        fromdate_date = Standing.objects.order_by('date')[0].date
-
-    todate_date = _string2date(str(todate))
-    if todate_date == None:
-        todate_date = Standing.objects.order_by('-date')[0].date
+def _graphs_standings(request, season, fromdate, todate):
+    (fromdate_date, todate_date) = _get_dates(season, fromdate, todate)
 
     teams = Standing.objects.filter(date=todate_date).order_by('rank')
     if len(teams) == 0:
@@ -182,15 +182,17 @@ def graphs(request):
         fromdate = request.GET['fromdate']
         todate = request.GET['todate']
         g_type = request.GET['graph_type']
+        season = request.GET['season']
     except KeyError as e:
         fromdate = '----/--/--'
         todate = '----/--/--'
         g_type = ''
+        season = ''
 
     if g_type in ['standings_pct']:
-        (index, data, template, title, subtitle) = _graphs_standings(request, fromdate, todate)
+        (index, data, template, title, subtitle) = _graphs_standings(request, season, fromdate, todate)
     elif g_type in ['exp_standings_pct']:
-        (index, data, template, title, subtitle) = _graphs_exp_standings(request, fromdate, todate)
+        (index, data, template, title, subtitle) = _graphs_exp_standings(request, season, fromdate, todate)
     else :
         index = []
         data = []
@@ -201,6 +203,7 @@ def graphs(request):
     context = RequestContext(request, {
         'graph_type' : g_type,
         'seasons' : seasons,
+        'season' : season,
         'data' : data,
         'index' : index,
         'title' : title,

@@ -9,13 +9,16 @@
       <table class="table">
         <thead>
           <tr>
-            <th class="col-md-4">
+            <th class="col-md-3">
             Type
             </th>
             <th class="col-md-3">
+            Season
+            </th>
+            <th class="col-md-2">
             시작일
             </th>
-            <th class="col-md-3">
+            <th class="col-md-2">
             종료일
             </th>
             <th class="col-md-2">
@@ -32,7 +35,16 @@
                 </select>
               </div>
             </td>
-            <td class="col-md-3">
+            <td>
+              <div class="form-group">
+                <select class="form-control" name="season">
+{% for s in seasons %}
+                  <option value="{{s.name}}"{% if season == s.name %} selected{% endif %}>{{s.name}}</option>
+{% endfor %}
+                </select>
+              </div>
+            </td>
+            <td>
               <div class="input-group date">
                 <input type="text" class="form-control" name="fromdate" value="{{ fromdate }}">
                 <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
