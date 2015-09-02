@@ -14,16 +14,20 @@
     function drawChart() {
 
       var data = new google.visualization.DataTable();
-      data.addColumn('number', 'Day');
+
+      data.addColumn('string', 'Day');
 {% for i in index %}
       data.addColumn('number', '{{ i }}');
 {% endfor %}
 
       data.addRows([
 {% for r in data %}
-  [ {{ forloop.counter }}, 
-  {% for e in r %}
-    {{ e.pct }},
+  [
+  {% for e in r|slice:"1" %}
+    '{{ e }}',
+  {% endfor %}
+  {% for e in r|slice:"1:" %}
+    {{ e }},
   {% endfor %}
   ],
 {% endfor %}

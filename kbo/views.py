@@ -127,13 +127,15 @@ def _graphs_exp_standings(request, season, fromdate, todate):
 
     data = []
     row = []
+    row.append("{d}".format(d=standings[0].date))
     date = standings[0].date
     for s in standings:
         if date != s.date:
             data.append(row)
             row=[]
+            row.append("{d}".format(d=s.date))
             date = s.date
-        row.append(s)
+        row.append(s.pct/1000.0)
     template = loader.get_template('kbo/graphs_standings_pct.html')
     title = "ExpStandings"
     subtitle = "pct"
@@ -159,13 +161,15 @@ def _graphs_standings(request, season, fromdate, todate):
 
     data = []
     row = []
+    row.append("{d}".format(d=standings[0].date))
     date = standings[0].date
     for s in standings:
         if date != s.date:
             data.append(row)
             row=[]
+            row.append("{d}".format(d=s.date))
             date = s.date
-        row.append(s)
+        row.append(s.pct/1000.0)
     template = loader.get_template('kbo/graphs_standings_pct.html')
     title = "Standings"
     subtitle = "pct"
