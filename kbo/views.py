@@ -107,13 +107,13 @@ def _get_dates(season, fromdate, todate):
 
     return (fromdate_date, todate_date)
 
-def _graphs_exp_standings(request, season, fromdate, todate):
+def _graphs_exp_standings(request, g_type, season, fromdate, todate):
     (fromdate_date, todate_date) = _get_dates(season, fromdate, todate)
 
-    teams = ExpStanding.objects.filter(date=todate_date).order_by('rank')
+    teams = ExpStanding.objects.filter(date=todate_date).order_by('team')
     if len(teams) == 0:
         alternative_standing = ExpStanding.objects.filter(date__lt=todate_date).order_by('-date')[0]
-        teams = ExpStanding.objects.filter(date=alternative_standing.date).order_by('rank')
+        teams = ExpStanding.objects.filter(date=alternative_standing.date).order_by('team')
 
     index = []
     for t in teams:
@@ -123,7 +123,7 @@ def _graphs_exp_standings(request, season, fromdate, todate):
         date__gte=fromdate_date,
         date__lte=todate_date,
         season = teams[0].season,
-    ).order_by('date', 'rank')
+    ).order_by('date', 'team')
 
     data = []
     row = []
@@ -135,19 +135,25 @@ def _graphs_exp_standings(request, season, fromdate, todate):
             row=[]
             row.append("{d}".format(d=s.date))
             date = s.date
-        row.append(s.pct/1000.0)
+        if g_type == 'exp_standings_pct': 
+            row.append(s.pct/1000.0)
+        elif g_type == 'exp_standings_rank': 
+            row.append(s.rank)
+        else:
+            row.append(0)
+
     template = loader.get_template('kbo/graphs_standings_pct.html')
     title = "ExpStandings"
     subtitle = "pct"
     return (index, data, template, title, subtitle)
 
-def _graphs_standings(request, season, fromdate, todate):
+def _graphs_standings(request, g_type, season, fromdate, todate):
     (fromdate_date, todate_date) = _get_dates(season, fromdate, todate)
 
-    teams = Standing.objects.filter(date=todate_date).order_by('rank')
+    teams = Standing.objects.filter(date=todate_date).order_by('team')
     if len(teams) == 0:
         alternative_standing = Standing.objects.filter(date__lt=todate_date).order_by('-date')[0]
-        teams = Standing.objects.filter(date=alternative_standing.date).order_by('rank')
+        teams = Standing.objects.filter(date=alternative_standing.date).order_by('team')
 
     index = []
     for t in teams:
@@ -157,7 +163,7 @@ def _graphs_standings(request, season, fromdate, todate):
         date__gte=fromdate_date,
         date__lte=todate_date,
         season = teams[0].season,
-    ).order_by('date', 'rank')
+    ).order_by('date', 'team')
 
     data = []
     row = []
@@ -169,7 +175,12 @@ def _graphs_standings(request, season, fromdate, todate):
             row=[]
             row.append("{d}".format(d=s.date))
             date = s.date
-        row.append(s.pct/1000.0)
+        if g_type == 'standings_pct': 
+            row.append(s.pct/1000.0)
+        elif g_type == 'standings_rank': 
+            row.append(s.rank)
+        else:
+            row.append(0)
     template = loader.get_template('kbo/graphs_standings_pct.html')
     title = "Standings"
     subtitle = "pct"
@@ -193,10 +204,10 @@ def graphs(request):
         g_type = ''
         season = ''
 
-    if g_type in ['standings_pct']:
-        (index, data, template, title, subtitle) = _graphs_standings(request, season, fromdate, todate)
-    elif g_type in ['exp_standings_pct']:
-        (index, data, template, title, subtitle) = _graphs_exp_standings(request, season, fromdate, todate)
+    if g_type in ['standings_pct', 'standings_rank']:
+        (index, data, template, title, subtitle) = _graphs_standings(request, g_type, season, fromdate, todate)
+    elif g_type in ['exp_standings_pct', 'exp_standings_rank']:
+        (index, data, template, title, subtitle) = _graphs_exp_standings(request, g_type, season, fromdate, todate)
     else :
         index = []
         data = []

@@ -30,6 +30,8 @@
             <td>
               <div class="form-group">
                 <select class="form-control" name="graph_type">
+                  <option value="standings_rank"{% if graph_type == 'standings_rank' %} selected{% endif %}>Standings</option>
+                  <option value="exp_standings_rank"{% if graph_type == 'exp_standings_rank' %} selected{% endif %}>Exp.Standings</option>
                   <option value="standings_pct"{% if graph_type == 'standings_pct' %} selected{% endif %}>Standings (pct)</option>
                   <option value="exp_standings_pct"{% if graph_type == 'exp_standings_pct' %} selected{% endif %}>Exp.Standings (pct)</option>
                 </select>

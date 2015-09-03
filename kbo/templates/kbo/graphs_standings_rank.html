@@ -1,0 +1,50 @@
+{% extends "kbo/graphs_base.html" %}
+
+{% load kbo_formatters %}
+
+{% block graphs_content %}
+<div id="linechart_material"></div>
+{% endblock %}
+
+{% block graphs_js %}
+<script type="text/javascript">
+    google.load('visualization', '1.1', {packages: ['line']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+
+      data.addColumn('string', 'Day');
+{% for i in index %}
+      data.addColumn('number', '{{ i }}');
+{% endfor %}
+
+      data.addRows([
+{% for r in data %}
+  [
+  {% for e in r|slice:"1" %}
+    '{{ e }}',
+  {% endfor %}
+  {% for e in r|slice:"1:" %}
+    {{ e }},
+  {% endfor %}
+  ],
+{% endfor %}
+      ]);
+
+      var options = {
+        chart: {
+          title: '{{ title }}',
+          subtitle: '{{ subtitle }}'
+        },
+        width: 900,
+        height: 500
+      };
+
+      var chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+      chart.draw(data, options);
+    }
+  </script>
+{% endblock %}
